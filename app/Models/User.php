@@ -14,6 +14,5 @@ class User extends Model
     protected $table      = 'todo_users_tb';
     protected $primaryKey = 'id_user';
     public    $timestamps = true;
-
-    protected $fillable = ['username', 'password'];
+    protected $fillable   = ['username', 'password'];
 }
