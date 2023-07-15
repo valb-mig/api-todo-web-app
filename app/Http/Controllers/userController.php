@@ -22,7 +22,10 @@ class UserController extends Controller
         {
             if(Hash::check($credentials['password'], $user->hash)) 
             {
-                $token = $user->createToken('token')->plainTextToken;
+                $token = $user->createToken('laravelSessionToken')->plainTextToken;
+
+                $user->session_token = $token;
+                $user->save();
 
                 return response()->json([
                     'success' => true,
@@ -74,6 +77,33 @@ class UserController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => 'User already exists',
+            ]);
+        }
+    }
+
+    public function getData(Request $request)
+    {
+        $credentials = $request->validate([
+            'token' => 'required|string',
+        ]);
+
+        $exists = User::where('session_token', $credentials['token'])->exists();
+        
+        if($exists) 
+        {
+            $user = User::where('session_token', $credentials['token'])->first();
+
+            return response()->json([
+                'username' => $user->username,
+                'success'  => true,
+                'message'  => 'Token verified',
+            ]);
+        }
+        else
+        {
+            return response()->json([
+                'success' => false,
+                'message' => 'Token undefined',
             ]);
         }
     }
