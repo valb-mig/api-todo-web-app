@@ -19,13 +19,42 @@ class ProjectController extends Controller
 
         if($user)
         {
-            $project = Project::where('id_user', $user->id_user)->first();
+            $projects = Project::where('id_user', $user->id_user)->get();
 
-            if($project)
+            $project_object = [
+                'todo' => [
+
+                ],
+                'kanban' => [
+
+                ],
+            ];
+
+            foreach($projects as $project)
+            {
+                switch($project['project_type'])
+                {
+                    case "T":
+                        $type = "todo";
+                    break;
+
+                    case "K":
+                        $type = "kanban";
+                    break;
+                }
+
+                $project_object[$type][$project['title_project']] = [
+                    'icon_name' => $project['icon_project'],
+                    'type'      => $type
+                ];
+            }
+
+            if($projects)
             {
                 return response()->json([
-                    'success' => true,
-                    'message' => "Projects exists",
+                    'projects' => $project_object,
+                    'success'  => true,
+                    'message'  => "Projects exists",
                 ]);
             }
         }
