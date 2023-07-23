@@ -44,6 +44,7 @@ class ProjectController extends Controller
                 }
 
                 $project_object[$type][$project['title_project']] = [
+                    'id'        => $project['id_project'],
                     'icon_name' => $project['icon_project'],
                     'type'      => $type
                 ];
