@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use App\Models\Task;
 use App\Models\Project;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
@@ -43,10 +44,21 @@ class ProjectController extends Controller
                     break;
                 }
 
+                $project = Project::where('id_project', $project['id_project'])
+                                  ->where('id_user', $user->id_user)
+                                  ->first();
+
+                $tasks = Task::where('id_user',$user->id_user)
+                             ->where('id_project',$project->id_project)
+                             ->where('task_type',$project->project_type)
+                             ->where('task_status','A')
+                             ->get();
+
                 $project_object[$type][$project['title_project']] = [
-                    'id_project' => $project['id_project'],
-                    'icon_name'  => $project['icon_project'],
-                    'type'       => $type
+                    'id_project' =>  $project['id_project'],
+                    'icon_name'  =>  $project['icon_project'],
+                    'type'       =>  $type,
+                    'tasks'      =>  $tasks
                 ];
             }
 
