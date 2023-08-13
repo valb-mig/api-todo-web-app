@@ -89,6 +89,17 @@ class TaskConstroller extends Controller
                 $task->save();
 
                 return response()->json([
+                    'task'    => [
+                        'task_title'       => $credentials['task_title'],
+                        'task_desc'        => $credentials['task_desc'],
+                        'task_type'        => $project->project_type,
+                        'id_project'       => $project->id_project,
+                        'id_user'          => $user->id_user,
+                        'task_status'      => "A",
+                        'last_update'      => date('Y-m-d H:i:s'),
+                        'date_status_task' => date('Y-m-d H:i:s'),
+                        'create_date'      => date('Y-m-d H:i:s')
+                    ],
                     'success' => true,
                     'message' => "Task added successfully",
                 ]);
