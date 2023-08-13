@@ -82,6 +82,7 @@ class TaskConstroller extends Controller
                 $task->id_project  = $project->id_project;
                 $task->id_user     = $user->id_user;
                 $task->task_status = "A";
+                $task->last_update = date('Y-m-d H:i:s');
                 $task->date_status_task = date('Y-m-d H:i:s');
                 $task->create_date      = date('Y-m-d H:i:s');
 
@@ -90,6 +91,70 @@ class TaskConstroller extends Controller
                 return response()->json([
                     'success' => true,
                     'message' => "Task added successfully",
+                ]);
+            }
+            else
+            {
+                return response()->json([
+                    'success' => false,
+                    'message' => "Project doesn't exist",
+                ]);
+            }
+        }
+        else 
+        {
+            return response()->json([
+                'success' => false,
+                'message' => "User doesn't exists",
+            ]);
+        }
+    }
+
+    public function edittask(Request $request) 
+    {
+        $token = $request->header('Authorization');
+
+        $credentials = $request->validate([
+            'id_project' => 'required|int',
+            'id_task'    => 'required|int',
+            'action'     => 'required|string'
+        ]); 
+
+        $user = User::where('session_token', $token)->first();
+
+        if($user)
+        {
+            $project = Project::where('id_project', $credentials['id_project'])
+                              ->where('id_user', $user->id_user)
+                              ->first();
+            if($project) 
+            {
+                $task = Task::where('id_project', $credentials['id_project'])
+                            ->where('id_user', $user->id_user)
+                            ->where('id_task', $credentials['id_task'])
+                            ->first();
+
+                switch($credentials['action']) {
+
+                    case 'done':
+                        $task->task_done = "Y";
+                    break;
+
+                    case 'not-done':
+                        $task->task_done = "N";
+                    break;
+
+                    default:
+                    break;
+                }
+
+                $task->last_update = date('Y-m-d H:i:s');
+
+                $task->save();
+
+                return response()->json([
+                    'success' => true,
+                    'message' => "Task edited successfully",
                 ]);
             }
             else

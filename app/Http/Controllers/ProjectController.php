@@ -54,11 +54,11 @@ class ProjectController extends Controller
                              ->where('task_status','A')
                              ->get();
 
-                $project_object[$type][$project['title_project']] = [
-                    'id_project' =>  $project['id_project'],
-                    'icon_name'  =>  $project['icon_project'],
-                    'type'       =>  $type,
-                    'tasks'      =>  $tasks
+                $project_object[$type][$project['id_project']] = [
+                    'title_project' =>  $project['title_project'],
+                    'icon_name'     =>  $project['icon_project'],
+                    'type'          =>  $type,
+                    'tasks'         =>  $tasks
                 ];
             }
 
