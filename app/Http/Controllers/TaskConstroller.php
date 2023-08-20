@@ -90,6 +90,7 @@ class TaskConstroller extends Controller
 
                 return response()->json([
                     'task'    => [
+                        'id_task'          => $task->id_task,
                         'task_title'       => $credentials['task_title'],
                         'task_desc'        => $credentials['task_desc'],
                         'task_type'        => $project->project_type,
@@ -121,7 +122,7 @@ class TaskConstroller extends Controller
         }
     }
 
-    public function edittask(Request $request) 
+    public function editTask(Request $request) 
     {
         $token = $request->header('Authorization');
 
@@ -166,6 +167,56 @@ class TaskConstroller extends Controller
                 return response()->json([
                     'success' => true,
                     'message' => "Task edited successfully",
+                ]);
+            }
+            else
+            {
+                return response()->json([
+                    'success' => false,
+                    'message' => "Project doesn't exist",
+                ]);
+            }
+        }
+        else 
+        {
+            return response()->json([
+                'success' => false,
+                'message' => "User doesn't exists",
+            ]);
+        }
+    }
+
+    public function removeTask(Request $request) 
+    {
+        $token = $request->header('Authorization');
+
+        $credentials = $request->validate([
+            'id_project' => 'required|int',
+            'id_task'    => 'required|int'
+        ]); 
+
+        $user = User::where('session_token', $token)->first();
+
+        if($user)
+        {
+            $project = Project::where('id_project', $credentials['id_project'])
+                              ->where('id_user', $user->id_user)
+                              ->first();
+            if($project) 
+            {
+                $task = Task::where('id_project', $credentials['id_project'])
+                            ->where('id_user', $user->id_user)
+                            ->where('id_task', $credentials['id_task'])
+                            ->first();
+
+                $task->task_status = "I";
+                $task->last_update = date('Y-m-d H:i:s');
+
+                $task->save();
+
+                return response()->json([
+                    'success' => true,
+                    'message' => "Task removed successfully",
                 ]);
             }
             else
