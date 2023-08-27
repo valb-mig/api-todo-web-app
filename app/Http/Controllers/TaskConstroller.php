@@ -13,23 +13,22 @@ class TaskConstroller extends Controller
 {
     public function getTasks(Request $request)
     {
+        $token = $request->header('Authorization');
+
         $credentials = $request->validate([
-            'token'      => 'required|string',
-            'id_project' => 'required|int',
+            'project_id' => 'required|int',
         ]);
     
-        $user = User::where('session_token', $credentials['token'])->first();
-
-        if($user)
+        if ( $user = User::where('session_token', $token)->first() )
         {
-            $project = Project::where('id_project', $credentials['id_project'])
-                              ->where('id_user', $user->id_user)
+            $project = Project::where('project_id', $credentials['project_id'])
+                              ->where('user_id', $user->user_id)
                               ->first();
 
             if($project) 
             {
-                $tasks = Task::where('id_user',$user->id_user)
-                             ->where('id_project',$project->id_project)
+                $tasks = Task::where('user_id',$user->id_user)
+                             ->where('project_id',$project->id_project)
                              ->where('task_type',$project->project_type)
                              ->where('task_status','A')
                              ->get();
@@ -58,49 +57,48 @@ class TaskConstroller extends Controller
 
     public function addTask(Request $request)
     {
+        $token = $request->header('Authorization');
+
         $credentials = $request->validate([
-            'token'      => 'required|string',
-            'id_project' => 'required|int',
+            'project_id' => 'required|int',
             'task_title' => 'required|string',
             'task_desc'  => 'required|string',
         ]);  
 
-        $user = User::where('session_token', $credentials['token'])->first();
-
-        if($user)
+        if ( $user = User::where('session_token', $token)->first() )
         {
-            $project = Project::where('id_project', $credentials['id_project'])
-                              ->where('id_user', $user->id_user)
+            $project = Project::where('project_id', $credentials['id_project'])
+                              ->where('user_id', $user->id_user)
                               ->first();
-            if($project) 
+            if ($project) 
             {
                 $task = new Task();
 
                 $task->task_title  = $credentials['task_title'];
                 $task->task_desc   = $credentials['task_desc'];
+                $task->task_color  = "default";
                 $task->task_type   = $project->project_type;
-                $task->id_project  = $project->id_project;
-                $task->id_user     = $user->id_user;
+                $task->project_id  = $project->project_id;
+                $task->user_id     = $user->user_id;
                 $task->task_status = "A";
-                $task->last_update = date('Y-m-d H:i:s');
-                $task->date_status_task = date('Y-m-d H:i:s');
-                $task->create_date      = date('Y-m-d H:i:s');
+                $task->updated_at  = date('Y-m-d H:i:s');
+                $task->created_at  = date('Y-m-d H:i:s');
 
                 $task->save();
 
                 return response()->json([
-                    'task'    => [
-                        'id_task'          => $task->id_task,
-                        'task_title'       => $credentials['task_title'],
-                        'task_desc'        => $credentials['task_desc'],
-                        'task_type'        => $project->project_type,
-                        'id_project'       => $project->id_project,
-                        'id_user'          => $user->id_user,
-                        'task_status'      => "A",
-                        'last_update'      => date('Y-m-d H:i:s'),
-                        'date_status_task' => date('Y-m-d H:i:s'),
-                        'create_date'      => date('Y-m-d H:i:s')
-                    ],
+                    // 'task'    => [
+                    //     'id_task'     => $task->id_task,
+                    //     'task_title'  => $credentials['task_title'],
+                    //     'task_desc'   => $credentials['task_desc'],
+                    //     'task_type'   => $project->project_type,
+                    //     'id_project'  => $project->id_project,
+                    //     'id_user'     => $user->id_user,
+                    //     'task_status' => "A",
+                    //     'updated_at'  => date('Y-m-d H:i:s'),
+                    //     'created_at'  => date('Y-m-d H:i:s')
+                    // ],
+                    'task'    => $task,
                     'success' => true,
                     'message' => "Task added successfully",
                 ]);
@@ -127,23 +125,21 @@ class TaskConstroller extends Controller
         $token = $request->header('Authorization');
 
         $credentials = $request->validate([
-            'id_project' => 'required|int',
-            'id_task'    => 'required|int',
+            'project_id' => 'required|int',
+            'task_id'    => 'required|int',
             'action'     => 'required|string'
         ]); 
 
-        $user = User::where('session_token', $token)->first();
-
-        if($user)
+        if ( $user = User::where('remember_token', $token)->first() )
         {
-            $project = Project::where('id_project', $credentials['id_project'])
-                              ->where('id_user', $user->id_user)
+            $project = Project::where('project_id', $credentials['project_id'])
+                              ->where('user_id', $user->user_id)
                               ->first();
-            if($project) 
+            if ( $project ) 
             {
-                $task = Task::where('id_project', $credentials['id_project'])
-                            ->where('id_user', $user->id_user)
-                            ->where('id_task', $credentials['id_task'])
+                $task = Task::where('project_id', $credentials['project_id'])
+                            ->where('user_id',    $user->user_id)
+                            ->where('task_id',    $credentials['task_id'])
                             ->first();
 
                 switch($credentials['action']) {
@@ -155,12 +151,9 @@ class TaskConstroller extends Controller
                     case 'not-done':
                         $task->task_done = "N";
                     break;
-
-                    default:
-                    break;
                 }
 
-                $task->last_update = date('Y-m-d H:i:s');
+                $task->updated_at = date('Y-m-d H:i:s');
 
                 $task->save();
 
@@ -191,26 +184,24 @@ class TaskConstroller extends Controller
         $token = $request->header('Authorization');
 
         $credentials = $request->validate([
-            'id_project' => 'required|int',
-            'id_task'    => 'required|int'
+            'project_id' => 'required|int',
+            'task_id'    => 'required|int'
         ]); 
 
-        $user = User::where('session_token', $token)->first();
-
-        if($user)
+        if ( $user = User::where('remember_token', $token)->first() )
         {
-            $project = Project::where('id_project', $credentials['id_project'])
-                              ->where('id_user', $user->id_user)
+            $project = Project::where('project_id', $credentials['project_id'])
+                              ->where('user_id', $user->user_id)
                               ->first();
-            if($project) 
+            if ( $project ) 
             {
-                $task = Task::where('id_project', $credentials['id_project'])
-                            ->where('id_user', $user->id_user)
-                            ->where('id_task', $credentials['id_task'])
+                $task = Task::where('project_id', $credentials['project_id'])
+                            ->where('user_id', $user->id_ususer_ider)
+                            ->where('task_id', $credentials['task_id'])
                             ->first();
 
                 $task->task_status = "I";
-                $task->last_update = date('Y-m-d H:i:s');
+                $task->updated_at  = date('Y-m-d H:i:s');
 
                 $task->save();
 

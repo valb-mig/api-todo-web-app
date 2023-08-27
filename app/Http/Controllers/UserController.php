@@ -16,21 +16,19 @@ class UserController extends Controller
             'password' => 'required|string',
         ]);
     
-        $user = User::where('username', $credentials['username'])->first();
-
-        if($user)
+        if ( $user = User::where('username', $credentials['username'])->first() )
         {
-            if(Hash::check($credentials['password'], $user->hash)) 
+            if ( Hash::check($credentials['password'], $user->hash) ) 
             {
                 $token = $user->createToken('laravelSessionToken')->plainTextToken;
 
-                $user->session_token = $token;
+                $user->remember_token = $token;
+                $user->updated_at = date('Y-m-d H:i:s');
                 $user->save();
 
                 return response()->json([
                     'success' => true,
                     'message' => "User logged",
-                    'token'   => $token
                 ]);
             }
             else
@@ -52,58 +50,28 @@ class UserController extends Controller
 
     public function register(Request $request)
     {
-        $credentials = $request->validate([
-            'username' => 'required|string',
-            'password' => 'required|string',
-        ]);
-
-        $exists = User::where('username', $credentials['username'])->exists();
-        
-        $user = new User();
-
-        if (!$exists) 
-        {
-            $user->username = $credentials['username'];
-            $user->hash = Hash::make($credentials['password']);
-            $user->save();
-
-            return response()->json([
-                'success' => true,
-                'message' => 'User registered successfully',
-            ]);
-        }
-        else
-        {
-            return response()->json([
-                'success' => false,
-                'message' => 'User already exists',
-            ]);
-        }
+        /* [Todo]: Register code */
     }
 
     public function getData(Request $request)
     {
-        $credentials = $request->validate([
-            'token' => 'required|string',
-        ]);
-
-        $exists = User::where('session_token', $credentials['token'])->exists();
+        $token = $request->header('Authorization');
         
-        if($exists) 
+        if ( User::where('remember_token', $token)->exists() ) 
         {
-            $user = User::where('session_token', $credentials['token'])->first();
+            $user = User::where('remember_token', $token)->first();
 
             return response()->json([
-                'username' => $user->username,
-                'success'  => true,
-                'message'  => 'Token verified',
+                'user'    => $user,
+                'success' => true,
+                'message' => 'Token verified',
             ]);
         }
         else
         {
             return response()->json([
                 'success' => false,
-                'message' => 'Token undefined',
+                'message' => 'Invalid token',
             ]);
         }
     }

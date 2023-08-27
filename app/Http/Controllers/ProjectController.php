@@ -12,17 +12,14 @@ class ProjectController extends Controller
 {
     public function getProjects(Request $request)
     {
-        $credentials = $request->validate([
-            'token'  => 'required|string',
-        ]);
-    
-        $user = User::where('session_token', $credentials['token'])->first();
+        $token = $request->header('Authorization');
 
-        if($user)
+        if ( $user = User::where('remember_token', $token)->first() )
         {
-            $projects = Project::where('id_user', $user->id_user)->get();
+            $projects = Project::where('user_id', $user->user_id)->get();
 
             $project_object = [
+                
                 'todo' => [
 
                 ],
@@ -31,9 +28,9 @@ class ProjectController extends Controller
                 ],
             ];
 
-            foreach($projects as $project)
+            foreach( $projects as $project )
             {
-                switch($project['project_type'])
+                switch( $project['project_type'] )
                 {
                     case "T":
                         $type = "todo";
@@ -44,27 +41,26 @@ class ProjectController extends Controller
                     break;
                 }
 
-                $project = Project::where('id_project', $project['id_project'])
-                                  ->where('id_user', $user->id_user)
+                $project = Project::where('project_id', $project['project_id'])
+                                  ->where('user_id', $user->user_id)
                                   ->first();
 
-                $tasks = Task::where('id_user',$user->id_user)
-                             ->where('id_project',$project->id_project)
-                             ->where('task_type',$project->project_type)
+                $tasks = Task::where('user_id', $user->user_id)
+                             ->where('project_id', $project->project_id)
+                             ->where('task_type', $project->project_type)
                              ->where('task_status','A')
                              ->get();
 
-
-                $project_object[$type][$project['id_project']] = [
+                $project_object[$type][$project['project_id']] = [
                 
-                    'title_project' =>  $project['title_project'],
-                    'icon_name'     =>  $project['icon_project'],
-                    'type'          =>  $type,
-                    'tasks'         =>  $tasks
+                    'project_title' =>  $project['project_title'],
+                    'project_icon'  =>  $project['project_icon'],
+                    'project_type'  =>  $type,
+                    'project_tasks' =>  $tasks
                 ];
             }
 
-            if($projects)
+            if ($projects)
             {
                 return response()->json([
                     'projects' => $project_object,
@@ -84,27 +80,27 @@ class ProjectController extends Controller
 
     public function addProject(Request $request)
     { 
-        $credentials = $request->validate([
-            'title'     => 'required|string',
-            'icon_name' => 'required|string',
-            'token'     => 'required|string',
-            'type'      => 'required|string',
-            'days'      => 'required|int',
-        ]);
-    
-        $user = User::where('session_token', $credentials['token'])->first();
+        $token = $request->header('Authorization');
 
-        if($user)
+        $credentials = $request->validate([
+            'project_title' => 'required|string',
+            'project_icon'  => 'required|string',
+            'project_type'  => 'required|string',
+            'project_days'  => 'required|int',
+        ]);
+
+        if ( $user = User::where('remember_token', $token)->first() )
         {
             $project = new Project;
             
-            $project->title_project = $credentials['title'];
-            $project->color_project = null;
-            $project->icon_project  = $credentials['icon_name'];
-            $project->project_type  = $credentials['type'] == 'todo' ? 'T' : 'K';
-            $project->create_date   = date('Y-m-d H:i:s');
-            $project->id_user       = $user->id_user;
-            $project->days_project  = $credentials['days'];
+            $project->project_title = $credentials['project_title'];
+            $project->project_color = null;
+            $project->project_icon  = $credentials['project_icon'];
+            $project->project_type  = $credentials['project_type'];
+            $project->project_days  = $credentials['project_days'];
+            $project->created_at    = date('Y-m-d H:i:s');
+            $project->user_id       = $user->user_id;
+            $project->project_days  = $credentials['project_days'];
 
             $project->save();
 
@@ -124,11 +120,11 @@ class ProjectController extends Controller
 
     public function editProject(Request $request)
     {
-        
+        /* [Todo]: Edit project code */
     }
 
     public function removeProject(Request $request)
     {
-        
+        /* [Todo]: Remove project code */
     }
 }
