@@ -19,9 +19,9 @@ Route::get('/', function(){
 
 // User
 
-Route::post('/user',     [userController::class, 'getData']);
-Route::post('/login',    [userController::class, 'login']);
-Route::post('/register', [userController::class, 'register']); 
+Route::post('/user',          [userController::class, 'getData']);
+Route::post('/user/login',    [userController::class, 'login']);
+Route::post('/user/register', [userController::class, 'register']); 
 
 
 // Projects

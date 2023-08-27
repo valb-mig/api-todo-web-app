@@ -42,7 +42,7 @@ class TaskConstroller extends Controller
             {
                 return response()->json([
                     'success' => false,
-                    'message' => "Project doesn't exist",
+                    'message' => "Project doesn't exist"
                 ]);
             }
         }
@@ -50,7 +50,7 @@ class TaskConstroller extends Controller
         {
             return response()->json([
                 'success' => false,
-                'message' => "User doesn't exists",
+                'message' => "User doesn't exists"
             ]);
         }
     }
@@ -62,7 +62,7 @@ class TaskConstroller extends Controller
         $credentials = $request->validate([
             'project_id' => 'required|int',
             'task_title' => 'required|string',
-            'task_desc'  => 'required|string',
+            'task_desc'  => 'required|string'
         ]);  
 
         if ( $user = User::where('session_token', $token)->first() )
@@ -87,27 +87,17 @@ class TaskConstroller extends Controller
                 $task->save();
 
                 return response()->json([
-                    // 'task'    => [
-                    //     'id_task'     => $task->id_task,
-                    //     'task_title'  => $credentials['task_title'],
-                    //     'task_desc'   => $credentials['task_desc'],
-                    //     'task_type'   => $project->project_type,
-                    //     'id_project'  => $project->id_project,
-                    //     'id_user'     => $user->id_user,
-                    //     'task_status' => "A",
-                    //     'updated_at'  => date('Y-m-d H:i:s'),
-                    //     'created_at'  => date('Y-m-d H:i:s')
-                    // ],
-                    'task'    => $task,
+                 
                     'success' => true,
                     'message' => "Task added successfully",
+                    'task'    => $task
                 ]);
             }
             else
             {
                 return response()->json([
                     'success' => false,
-                    'message' => "Project doesn't exist",
+                    'message' => "Project doesn't exist"
                 ]);
             }
         }
@@ -115,7 +105,7 @@ class TaskConstroller extends Controller
         {
             return response()->json([
                 'success' => false,
-                'message' => "User doesn't exists",
+                'message' => "User doesn't exists"
             ]);
         }
     }
@@ -159,14 +149,14 @@ class TaskConstroller extends Controller
 
                 return response()->json([
                     'success' => true,
-                    'message' => "Task edited successfully",
+                    'message' => "Task edited successfully"
                 ]);
             }
             else
             {
                 return response()->json([
                     'success' => false,
-                    'message' => "Project doesn't exist",
+                    'message' => "Project doesn't exist"
                 ]);
             }
         }
@@ -174,7 +164,7 @@ class TaskConstroller extends Controller
         {
             return response()->json([
                 'success' => false,
-                'message' => "User doesn't exists",
+                'message' => "User doesn't exists"
             ]);
         }
     }
@@ -207,14 +197,14 @@ class TaskConstroller extends Controller
 
                 return response()->json([
                     'success' => true,
-                    'message' => "Task removed successfully",
+                    'message' => "Task removed successfully"
                 ]);
             }
             else
             {
                 return response()->json([
                     'success' => false,
-                    'message' => "Project doesn't exist",
+                    'message' => "Project doesn't exist"
                 ]);
             }
         }
@@ -222,7 +212,7 @@ class TaskConstroller extends Controller
         {
             return response()->json([
                 'success' => false,
-                'message' => "User doesn't exists",
+                'message' => "User doesn't exists"
             ]);
         }
     }

@@ -13,7 +13,7 @@ class UserController extends Controller
     {
         $credentials = $request->validate([
             'username' => 'required|string',
-            'password' => 'required|string',
+            'password' => 'required|string'
         ]);
     
         if ( $user = User::where('username', $credentials['username'])->first() )
@@ -28,14 +28,14 @@ class UserController extends Controller
 
                 return response()->json([
                     'success' => true,
-                    'message' => "User logged",
+                    'session_token' => $token
                 ]);
             }
             else
             {
                 return response()->json([
                     'success' => false,
-                    'message' => "Wrong password",
+                    'message' => "Wrong password"
                 ]);
             }
         }
@@ -43,14 +43,34 @@ class UserController extends Controller
         {
             return response()->json([
                 'success' => false,
-                'message' => "User don't exists",
+                'message' => "User don't exists"
             ]);
         }
     }
 
     public function register(Request $request)
     {
-        /* [Todo]: Register code */
+        $credentials = $request->validate([
+            'username' => 'required|string',
+            'password' => 'required|string'
+        ]);  
+
+        $user = new User();
+
+        $user->username       = $credentials['username'];
+        $user->hash           = Hash::make($credentials['password']);
+        $user->updated_at     = now();
+        $user->created_at     = now();
+
+        $user->save();
+
+        $token = $user->createToken('laravelSessionToken')->plainTextToken;
+
+        return response()->json([
+            
+            'success' => true,
+            'session_token' => $token
+        ]);
     }
 
     public function getData(Request $request)
@@ -62,16 +82,17 @@ class UserController extends Controller
             $user = User::where('remember_token', $token)->first();
 
             return response()->json([
-                'user'    => $user,
                 'success' => true,
-                'message' => 'Token verified',
+                'user'    => [
+                    'name' => $user->username
+                ]
             ]);
         }
         else
         {
             return response()->json([
                 'success' => false,
-                'message' => 'Invalid token',
+                'message' => 'Invalid token'
             ]);
         }
     }

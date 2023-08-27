@@ -10,7 +10,7 @@ return new class extends Migration
     {
         Schema::create('todo_users', function (Blueprint $table) {
 
-            $table->integer('user_id')->primary();
+            $table->increments('user_id');
             $table->string('username')->unique();
             $table->string('hash');
             $table->rememberToken();

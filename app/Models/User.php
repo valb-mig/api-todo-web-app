@@ -11,8 +11,8 @@ class User extends Model
 {
     use HasApiTokens;
 
-    protected $table      = 'todo_users_tb';
-    protected $primaryKey = 'id_user';
+    protected $table      = 'todo_users';
+    protected $primaryKey = 'user_id';
     public    $timestamps = true;
     protected $fillable   = ['username', 'password'];
 }

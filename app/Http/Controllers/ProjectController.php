@@ -63,9 +63,8 @@ class ProjectController extends Controller
             if ($projects)
             {
                 return response()->json([
-                    'projects' => $project_object,
                     'success'  => true,
-                    'message'  => "Projects exists",
+                    'projects' => $project_object
                 ]);
             }
         }
@@ -73,7 +72,7 @@ class ProjectController extends Controller
         {
             return response()->json([
                 'success' => false,
-                'message' => "Invalid token",
+                'message' => "Invalid token"
             ]);
         }
     }
@@ -86,7 +85,7 @@ class ProjectController extends Controller
             'project_title' => 'required|string',
             'project_icon'  => 'required|string',
             'project_type'  => 'required|string',
-            'project_days'  => 'required|int',
+            'project_days'  => 'required|int'
         ]);
 
         if ( $user = User::where('remember_token', $token)->first() )
@@ -106,14 +105,14 @@ class ProjectController extends Controller
 
             return response()->json([
                 'success' => true,
-                'message' => "Project added",
+                'message' => "Project added"
             ]);
         }
         else 
         {
             return response()->json([
                 'success' => false,
-                'message' => "Invalid token",
+                'message' => "Invalid token"
             ]);
         }
     }
