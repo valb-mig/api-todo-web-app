@@ -12,7 +12,6 @@ return new class extends Migration
             
             $table->increments('project_id');
             $table->integer('user_id');
-            $table->integer('task_id');
             $table->string('project_title');
             $table->string('project_icon');
             $table->string('project_days');

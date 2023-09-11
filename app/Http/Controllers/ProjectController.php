@@ -41,10 +41,6 @@ class ProjectController extends Controller
                     break;
                 }
 
-                $project = Project::where('project_id', $project['project_id'])
-                                  ->where('user_id', $user->user_id)
-                                  ->first();
-
                 $tasks = Task::where('user_id', $user->user_id)
                              ->where('project_id', $project->project_id)
                              ->where('task_type', $project->project_type)
@@ -95,7 +91,7 @@ class ProjectController extends Controller
             $project->project_title = $credentials['project_title'];
             $project->project_color = null;
             $project->project_icon  = $credentials['project_icon'];
-            $project->project_type  = $credentials['project_type'];
+            $project->project_type  = $credentials['project_type'] == "todo" ? "T" : "K";
             $project->project_days  = $credentials['project_days'];
             $project->created_at    = date('Y-m-d H:i:s');
             $project->user_id       = $user->user_id;

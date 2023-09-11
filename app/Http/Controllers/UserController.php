@@ -28,7 +28,7 @@ class UserController extends Controller
 
                 return response()->json([
                     'success' => true,
-                    'session_token' => $token
+                    'remember_token' => $token
                 ]);
             }
             else
@@ -69,7 +69,7 @@ class UserController extends Controller
         return response()->json([
             
             'success' => true,
-            'session_token' => $token
+            'remember_token' => $token
         ]);
     }
 
