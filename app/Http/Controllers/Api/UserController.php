@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Api;
 
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -9,7 +9,20 @@ use Illuminate\Support\Facades\Hash;
 
 class UserController extends Controller
 {
-    public function login(Request $request)
+    public function userData(Request $request)
+    {
+        $token = $request->header('Authorization');
+        $user  = User::where('remember_token', $token)->first();
+
+        return response()->json([
+            'success' => true,
+            'user'    => [
+                'name' => $user->username
+            ]
+        ], 200);
+    }
+
+    public function userLogin(Request $request)
     {
         $credentials = $request->validate([
             'username' => 'required|string',
@@ -23,20 +36,20 @@ class UserController extends Controller
                 $token = $user->createToken('laravelSessionToken')->plainTextToken;
 
                 $user->remember_token = $token;
-                $user->updated_at = date('Y-m-d H:i:s');
+                $user->updated_at = now();
                 $user->save();
 
                 return response()->json([
                     'success' => true,
                     'remember_token' => $token
-                ]);
+                ], 200);
             }
             else
             {
                 return response()->json([
                     'success' => false,
                     'message' => "Wrong password"
-                ]);
+                ], 401);
             }
         }
         else 
@@ -44,56 +57,41 @@ class UserController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => "User don't exists"
-            ]);
+            ], 404);
         }
     }
 
-    public function register(Request $request)
+    public function userRegister(Request $request)
     {
         $credentials = $request->validate([
             'username' => 'required|string',
             'password' => 'required|string'
         ]);  
 
-        $user = new User();
-
-        $user->username       = $credentials['username'];
-        $user->hash           = Hash::make($credentials['password']);
-        $user->updated_at     = now();
-        $user->created_at     = now();
-
-        $user->save();
-
-        $token = $user->createToken('laravelSessionToken')->plainTextToken;
-
-        return response()->json([
-            
-            'success' => true,
-            'remember_token' => $token
-        ]);
-    }
-
-    public function getData(Request $request)
-    {
-        $token = $request->header('Authorization');
-        
-        if ( User::where('remember_token', $token)->exists() ) 
+        if(!User::where('username', $credentials['username'])->first())
         {
-            $user = User::where('remember_token', $token)->first();
+            $user = new User();
 
+            $user->username       = $credentials['username'];
+            $user->hash           = Hash::make($credentials['password']);
+            $user->updated_at     = now();
+            $user->created_at     = now();
+    
+            $user->save();
+    
+            $token = $user->createToken('laravelSessionToken')->plainTextToken;
+    
             return response()->json([
                 'success' => true,
-                'user'    => [
-                    'name' => $user->username
-                ]
-            ]);
+                'remember_token' => $token
+            ], 200);
         }
         else
         {
             return response()->json([
                 'success' => false,
-                'message' => 'Invalid token'
-            ]);
+                'message' => "User already exists"
+            ], 401);  
         }
     }
 }

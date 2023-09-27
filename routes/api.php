@@ -3,9 +3,9 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
-use App\Http\Controllers\UserController;
-use App\Http\Controllers\ProjectController;
-use App\Http\Controllers\TaskConstroller;
+use App\Http\Controllers\Api\UserController;
+use App\Http\Controllers\Api\ProjectController;
+use App\Http\Controllers\Api\TaskConstroller;
 
 use Illuminate\Support\Facades\Auth;
 
@@ -19,21 +19,26 @@ Route::get('/', function(){
 
 // User
 
-Route::post('/user',          [userController::class, 'getData']);
-Route::post('/user/login',    [userController::class, 'login']);
-Route::post('/user/register', [userController::class, 'register']); 
+Route::middleware('check.token')->group(function () {
+    Route::post('/user', [UserController::class, 'userData']);
+});
 
+Route::post('/user/login',    [UserController::class, 'userLogin']);
+Route::post('/user/register', [UserController::class, 'userRegister']); 
 
-// Projects
+Route::middleware('check.token')->group(function () {
 
-Route::post('/project',        [ProjectController::class, 'getProjects']);
-Route::post('/project/add',    [ProjectController::class, 'addProject']);
-Route::post('/project/remove', [ProjectController::class, 'removeProject']);
-Route::post('/project/edit',   [ProjectController::class, 'editProject']);
+    // Projects
+    
+    Route::post('/project',        [ProjectController::class, 'getProjects']);
+    Route::post('/project/add',    [ProjectController::class, 'addProject']);
+    Route::post('/project/remove', [ProjectController::class, 'removeProject']);
+    Route::post('/project/edit',   [ProjectController::class, 'editProject']);
+    
+    // Tasks
 
-// Tasks
-
-Route::post('/task',        [TaskConstroller::class, 'getTasks']);
-Route::post('/task/add',    [TaskConstroller::class, 'addTask']);
-Route::post('/task/remove', [TaskConstroller::class, 'removeTask']);
-Route::post('/task/edit',   [TaskConstroller::class, 'editTask']);
+    Route::post('/task',        [TaskConstroller::class, 'getTasks']);
+    Route::post('/task/add',    [TaskConstroller::class, 'addTask']);
+    Route::post('/task/remove', [TaskConstroller::class, 'removeTask']);
+    Route::post('/task/edit',   [TaskConstroller::class, 'editTask']);
+});
