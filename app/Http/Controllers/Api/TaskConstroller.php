@@ -75,12 +75,14 @@ class TaskConstroller extends Controller
 
             $task->save();
 
+            $task->task_done = $task->task_done == "Y" ? true : false;
+
             return response()->json([
                 
                 'success' => true,
                 'message' => "Task added successfully",
                 'task'    => $task
-            ], 200);
+            ], 201);
         }
         else
         {

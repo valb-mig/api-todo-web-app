@@ -84,14 +84,14 @@ class UserController extends Controller
             return response()->json([
                 'success' => true,
                 'remember_token' => $token
-            ], 200);
+            ], 201);
         }
         else
         {
             return response()->json([
                 'success' => false,
                 'message' => "User already exists"
-            ], 401);  
+            ], 304);  
         }
     }
 }

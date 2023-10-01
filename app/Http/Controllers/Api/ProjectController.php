@@ -13,6 +13,9 @@ class ProjectController extends Controller
 {
     public function getProjects(Request $request)
     {
+        $token = $request->header('Authorization');
+        $user  = User::where('remember_token', $token)->first();
+
         $projects = Project::where('user_id', $user->user_id)->get();
 
         $project_object = [
@@ -33,11 +36,13 @@ class ProjectController extends Controller
                         ->where('task_status','A')
                         ->get();
 
-            $project_object[$project['project_type']][$project['project_id']] = [
+            $type = $project['project_type'] == 'T' ? 'todo' : 'kanban';
+
+            $project_object[$type][$project['project_id']] = [
             
                 'project_title' =>  $project['project_title'],
                 'project_icon'  =>  $project['project_icon'],
-                'project_type'  =>  $project['project_type'],
+                'project_type'  =>  $type,
                 'project_tasks' =>  $tasks
             ];
         }
@@ -79,15 +84,35 @@ class ProjectController extends Controller
         return response()->json([
             'success' => true,
             'message' => "Project added"
-        ], 200);
+        ], 201);
     }
 
     public function editProject(Request $request)
     {
-        $token = $request->header('Authorization');
+        $token = $request->header('Authorization');       
         $user  = User::where('remember_token', $token)->first();
 
-        /* [Todo]: Edit project code */
+        $credentials = $request->validate([
+            'project_id'    => 'required|int',
+            'project_icon'  => 'required|string',
+            'project_title' => 'required|string',
+            'project_days'  => 'required|int' 
+        ]);
+
+        $project = Project::where('project_id', $credentials['project_id'])
+                    ->where('user_id', $user->user_id)
+                    ->first();
+
+        !empty($credentials['project_icon'])  ? $project->project_icon  = $credentials['project_icon']  : null;
+        !empty($credentials['project_title']) ? $project->project_title = $credentials['project_title'] : null;
+        !empty($credentials['project_days'])  ? $project->project_days  = $credentials['project_days']  : null;
+
+        $project->save();
+
+        return response()->json([
+            'success' => true,
+            'message' => "Project edited"
+        ], 200);
     }
 
     public function removeProject(Request $request)
